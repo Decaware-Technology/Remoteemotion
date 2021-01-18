@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Remoteemotion</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+<script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+</head>
+<body><div id="load">
+  <h1 id="title">Remoteemotion</h1>
+</div>
+<script>
+  
+  
+
+  document.onreadystatechange = function () {
+  var state = document.readyState
+  if (state == 'interactive') {
+       document.getElementById('contents').style.visibility="hidden";
+  } else if (state == 'complete') {
+      setTimeout(function(){
+         document.getElementById('interactive');
+         document.getElementById('load').style.visibility="hidden";
+         document.getElementById('contents').style.visibility="visible";
+      },1000);
+  }
+}
+document.getElementById("title").innerHTML = "Remoteemotion"
+  
+let classifier;
+// Model URL
+let imageModelURL = 'https://teachablemachine.withgoogle.com/models/RuaRaKI8u/';
+
+// Video
+let video;
+let flippedVideo;
+// To store the classification
+let label = "";
+
+// Load the model first
+function preload() {
+  classifier = ml5.imageClassifier(imageModelURL + 'model.json');
+}
+
+function setup() {
+  createCanvas(1280, 1040);
+  // Create the video
+  video = createCapture(VIDEO);
+  video.size(1280, 1040);
+  video.hide();
+
+  flippedVideo = ml5.flipImage(video)
+  // Start classifying
+  classifyVideo();
+}
+
+function draw() {
+  background(0);
+  // Draw the video
+  image(flippedVideo, 0, 0);
+
+  // Draw the label
+  fill(255);
+  textSize(16);
+  textAlign(CENTER);
+  text(label, width / 2, height - 4);
+}
+
+// Get a prediction for the current video frame
+function classifyVideo() {
+  flippedVideo = ml5.flipImage(video)
+  classifier.classify(flippedVideo, gotResult);
+}
+
+// When we get a result
+function gotResult(error, results) {
+  // If there is an error
+  if (error) {
+    console.error(error);
+    return;
+  }
+  // The results are in an array ordered by confidence.
+  // console.log(results[0]);
+  label = results[0].label;
+  // Classifiy again!
+  classifyVideo();
+
+}
+</script>
+
+<style>
+body
+{
+  text-align: center;
+background-image: "https://www.3ctele.com/wp-content/uploads/2015/12/3c-gradient-background.png";
+background-repeat: inherit;
+}
+
+#load{
+  width:100%;
+  height:100%;
+  position:fixed;
+  z-index:9999;
+  background:url("https://i.pinimg.com/originals/ca/f1/ae/caf1aea2294903e2aeb46343a3b13c2d.gif") no-repeat center center #090707
+}
+
+h1{
+  font-family: 'Open Sans',sans-serif
+}
+</style>
+
